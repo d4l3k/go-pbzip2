@@ -1,4 +1,4 @@
-# go-pbzip2
+# go-pbzip2 [![GoDoc](https://godoc.org/github.com/d4l3k/go-pbzip2?status.svg)](https://godoc.org/github.com/d4l3k/go-pbzip2) [![Build Status](https://travis-ci.com/d4l3k/go-pbzip2.svg?branch=master)](https://travis-ci.com/d4l3k/go-pbzip2)
 
 A go library to use pbzip2 for faster bzip2 operations than the stdlib. Supports
 both compression and decompression.
