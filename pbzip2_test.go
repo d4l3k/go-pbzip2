@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"io"
 	"io/ioutil"
+	"strconv"
 	"testing"
 )
 
@@ -18,6 +19,10 @@ func TestHasPBZip2(t *testing.T) {
 }
 
 func testString(t testing.TB) string {
+	return testStringN(t, targetLen)
+}
+
+func testStringN(t testing.TB, targetLen int64) string {
 	var buf bytes.Buffer
 	if _, err := io.CopyN(&buf, rand.Reader, targetLen); err != nil {
 		t.Fatal(err)
@@ -87,58 +92,70 @@ func TestReader(t *testing.T) {
 	}
 }
 
+var benchSizes = []int64{1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000}
+
 func BenchmarkPBZip2Read(b *testing.B) {
-	var buf bytes.Buffer
-	writer, err := NewWriter(&buf)
-	if err != nil {
-		b.Fatal(err)
-	}
-	in := testString(b)
-	if _, err := writer.Write([]byte(in)); err != nil {
-		b.Fatal(err)
-	}
-	if err := writer.Close(); err != nil {
-		b.Fatal(err)
-	}
-	compressed := buf.Bytes()
+	for _, size := range benchSizes {
+		size := size
+		b.Run(strconv.Itoa(int(size))+"B", func(b *testing.B) {
+			var buf bytes.Buffer
+			writer, err := NewWriter(&buf)
+			if err != nil {
+				b.Fatal(err)
+			}
+			in := testStringN(b, size)
+			if _, err := writer.Write([]byte(in)); err != nil {
+				b.Fatal(err)
+			}
+			if err := writer.Close(); err != nil {
+				b.Fatal(err)
+			}
+			compressed := buf.Bytes()
 
-	b.ResetTimer()
+			b.ResetTimer()
 
-	for i := 0; i < b.N; i++ {
-		reader, err := NewReader(bytes.NewReader(compressed))
-		if err != nil {
-			b.Fatal(err)
-		}
-		if _, err := ioutil.ReadAll(reader); err != nil {
-			b.Fatal(err)
-		}
-		if err := reader.Close(); err != nil {
-			b.Fatal(err)
-		}
+			for i := 0; i < b.N; i++ {
+				reader, err := NewReader(bytes.NewReader(compressed))
+				if err != nil {
+					b.Fatal(err)
+				}
+				if _, err := ioutil.ReadAll(reader); err != nil {
+					b.Fatal(err)
+				}
+				if err := reader.Close(); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
 	}
 }
 
 func BenchmarkBZip2Read(b *testing.B) {
-	var buf bytes.Buffer
-	writer, err := NewWriter(&buf)
-	if err != nil {
-		b.Fatal(err)
-	}
-	in := testString(b)
-	if _, err := writer.Write([]byte(in)); err != nil {
-		b.Fatal(err)
-	}
-	if err := writer.Close(); err != nil {
-		b.Fatal(err)
-	}
-	compressed := buf.Bytes()
+	for _, size := range benchSizes {
+		size := size
+		b.Run(strconv.Itoa(int(size))+"B", func(b *testing.B) {
+			var buf bytes.Buffer
+			writer, err := NewWriter(&buf)
+			if err != nil {
+				b.Fatal(err)
+			}
+			in := testStringN(b, size)
+			if _, err := writer.Write([]byte(in)); err != nil {
+				b.Fatal(err)
+			}
+			if err := writer.Close(); err != nil {
+				b.Fatal(err)
+			}
+			compressed := buf.Bytes()
 
-	b.ResetTimer()
+			b.ResetTimer()
 
-	for i := 0; i < b.N; i++ {
-		reader := bzip2.NewReader(bytes.NewReader(compressed))
-		if _, err := ioutil.ReadAll(reader); err != nil {
-			b.Fatal(err)
-		}
+			for i := 0; i < b.N; i++ {
+				reader := bzip2.NewReader(bytes.NewReader(compressed))
+				if _, err := ioutil.ReadAll(reader); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
 	}
 }

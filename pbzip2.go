@@ -36,7 +36,22 @@ func NewReader(r io.Reader) (io.ReadCloser, error) {
 	if err := cmd.Start(); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return pbzip2Reader{
+		ReadCloser: out,
+		cmd:        cmd,
+	}, nil
+}
+
+type pbzip2Reader struct {
+	io.ReadCloser
+	cmd *exec.Cmd
+}
+
+func (p pbzip2Reader) Close() error {
+	if err := p.ReadCloser.Close(); err != nil {
+		return err
+	}
+	return p.cmd.Wait()
 }
 
 func NewWriter(w io.Writer) (io.WriteCloser, error) {
