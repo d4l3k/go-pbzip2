@@ -1,3 +1,6 @@
+// pbzip2 is a wrapper around the pbzip2 command. If it's present on the system,
+// this library will use it for higher performance when decompressing bzip2
+// data.
 package pbzip2
 
 import (
@@ -19,6 +22,8 @@ func hasPBZip2() bool {
 	return true
 }
 
+// NewReader creates a new pbzip2 reader. This will print a warning if pbzip2 is
+// not present on the system and return a stdlib bzip2.Reader instead.
 func NewReader(r io.Reader) (io.ReadCloser, error) {
 	if !hasPBZip2() {
 		warn()
@@ -54,6 +59,8 @@ func (p pbzip2Reader) Close() error {
 	return p.cmd.Wait()
 }
 
+// NewWriter creates a new pbzip2 writer. This will return an error if pbzip2 is
+// not present on the system.
 func NewWriter(w io.Writer) (io.WriteCloser, error) {
 	if !hasPBZip2() {
 		return nil, errors.Errorf("missing pbzip2 from system")
