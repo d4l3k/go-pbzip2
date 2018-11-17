@@ -34,64 +34,6 @@ func testStringN(t testing.TB, targetLen int64) string {
 	return out
 }
 
-func TestWriter(t *testing.T) {
-	var buf bytes.Buffer
-	writer, err := NewWriter(&buf)
-	if err != nil {
-		t.Fatal(err)
-	}
-	in := testString(t)
-	if _, err := writer.Write([]byte(in)); err != nil {
-		t.Fatal(err)
-	}
-	if err := writer.Close(); err != nil {
-		t.Fatal(err)
-	}
-
-	reader := bzip2.NewReader(&buf)
-	body, err := ioutil.ReadAll(reader)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	out := string(body)
-	if out != in {
-		t.Errorf("%q != %q", out, in)
-	}
-}
-
-func TestReader(t *testing.T) {
-	var buf bytes.Buffer
-	writer, err := NewWriter(&buf)
-	if err != nil {
-		t.Fatal(err)
-	}
-	in := testString(t)
-	if _, err := writer.Write([]byte(in)); err != nil {
-		t.Fatal(err)
-	}
-	if err := writer.Close(); err != nil {
-		t.Fatal(err)
-	}
-
-	reader, err := NewReader(&buf)
-	if err != nil {
-		t.Fatal(err)
-	}
-	body, err := ioutil.ReadAll(reader)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	out := string(body)
-	if out != in {
-		t.Errorf("%q != %q", out, in)
-	}
-	if err := reader.Close(); err != nil {
-		t.Fatal(err)
-	}
-}
-
 var benchSizes = []int64{1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000}
 
 func BenchmarkPBZip2Read(b *testing.B) {

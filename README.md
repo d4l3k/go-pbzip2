@@ -34,3 +34,25 @@ BenchmarkBZip2Read/1000000B-8                200          76655666 ns/op
 BenchmarkBZip2Read/10000000B-8                20         745520450 ns/op
 BenchmarkBZip2Read/100000000B-8                2        8047164946 ns/op
 ```
+
+## Usage
+
+### Reader
+
+```go
+// If pbzip2 is not present on the system, stdlib bzip2.Reader is used instead.
+func NewReader(r io.Reader) (io.ReadCloser, error) { ... }
+```
+
+### Writer
+
+```go
+// NewWriter will use the default Level of 9
+func NewWriter(w io.Writer) (io.WriteCloser, error) { ... }
+
+type WriterConfig struct {
+    Level int
+}
+
+func NewWriterConfig(w io.Writer, conf *WriterConfig) (io.WriteCloser, error) { ... }
+```
